@@ -1,0 +1,14 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/analytics/route": "app/api/analytics/route.js",
+  "/api/cron/prune/route": "app-edge-has-no-entrypoint",
+  "/api/drift-check/route": "app/api/drift-check/route.js",
+  "/api/fires/route": "app/api/fires/route.js",
+  "/api/insights/route": "app/api/insights/route.js",
+  "/api/report/route": "app/api/report/route.js",
+  "/api/simulate/route": "app/api/simulate/route.js",
+  "/api/wind/route": "app/api/wind/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

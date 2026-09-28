@@ -1,0 +1,14 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/analytics/route": "/api/analytics",
+  "/api/cron/prune/route": "/api/cron/prune",
+  "/api/drift-check/route": "/api/drift-check",
+  "/api/fires/route": "/api/fires",
+  "/api/insights/route": "/api/insights",
+  "/api/report/route": "/api/report",
+  "/api/simulate/route": "/api/simulate",
+  "/api/wind/route": "/api/wind",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}
