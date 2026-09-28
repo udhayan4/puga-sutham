@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "site": "puga-sutham",
     "public": "public",
     "ignore": [
       "firebase.json",
