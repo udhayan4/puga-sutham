@@ -9,6 +9,7 @@ import {
   Shield,
   RotateCcw,
   Play,
+  FileCheck,
 } from "lucide-react";
 import { IncidentState } from "../lib/incident-engine";
 
@@ -60,7 +61,7 @@ export function TopNavbar({
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-[#E2E8F0] h-16 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-        {/* Brand & Subtitle */}
+        {/* Brand: PUGA SUTHAM alone without AI Heritage subtitle */}
         <div className="flex items-center gap-6">
           <button
             onClick={() => handleSelectTab("overview")}
@@ -70,11 +71,8 @@ export function TopNavbar({
               PS
             </div>
             <div>
-              <span className="font-extrabold text-sm sm:text-base tracking-tight text-[#0F172A] block leading-tight">
+              <span className="font-extrabold text-base tracking-tight text-[#0F172A] block leading-tight">
                 PUGA SUTHAM
-              </span>
-              <span className="text-[10px] text-[#64748B] font-medium block leading-none">
-                AI Heritage Safety Platform
               </span>
             </div>
           </button>
@@ -109,14 +107,24 @@ export function TopNavbar({
         </div>
 
         {/* Right Status Indicator & Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Live Pulse Indicator */}
           <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#475569]">
             <span className="w-2 h-2 rounded-full bg-[#16A34A] status-pulse"></span>
             <span className="text-[11px]">System Online</span>
           </div>
 
-          {/* Demo Control Trigger */}
+          {/* Demo Report Shortcut */}
+          <button
+            onClick={() => handleSelectTab("reports")}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] text-xs font-semibold transition-all shadow-xs"
+            title="Open Citizen Reports & AI Classifier"
+          >
+            <FileCheck className="w-3.5 h-3.5 text-[#2563EB]" />
+            <span>Demo Report</span>
+          </button>
+
+          {/* Run Demo Trigger */}
           <button
             onClick={onRunDemoScenario}
             disabled={isScenarioRunning}
@@ -124,7 +132,7 @@ export function TopNavbar({
             title="Run simulated incident flow"
           >
             <Play className="w-3 h-3 fill-current" />
-            <span className="hidden sm:inline">{isScenarioRunning ? "Running Demo..." : "Run Demo"}</span>
+            <span>{isScenarioRunning ? "Running Demo..." : "Run Demo"}</span>
           </button>
 
           {/* Reset button */}
@@ -147,7 +155,7 @@ export function TopNavbar({
         </div>
       </div>
 
-      {/* Mobile Drawer (Smooth Slide-down pure white) */}
+      {/* Mobile Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-[#E2E8F0] px-4 py-3 space-y-1 shadow-sm transition-all animate-in slide-in-from-top-2 duration-200">
           {navLinks.map((item) => {
