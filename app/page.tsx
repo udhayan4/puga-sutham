@@ -83,10 +83,18 @@ async function getDashboardData() {
   };
 }
 
-export default async function DashboardPage() {
-  const siteLat = KEELADI_LAT;
-  const siteLon = KEELADI_LON;
-  const isCustomLocation = false;
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ lat?: string; lon?: string; region?: string }>;
+}) {
+  const params = await searchParams;
+  const parsedLat = params?.lat ? parseFloat(params.lat) : null;
+  const parsedLon = params?.lon ? parseFloat(params.lon) : null;
+
+  const isCustomLocation = parsedLat !== null && parsedLon !== null && !isNaN(parsedLat) && !isNaN(parsedLon);
+  const siteLat = isCustomLocation ? parsedLat! : KEELADI_LAT;
+  const siteLon = isCustomLocation ? parsedLon! : KEELADI_LON;
 
   const data = await getDashboardData();
 

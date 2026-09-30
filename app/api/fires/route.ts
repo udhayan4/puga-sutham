@@ -22,18 +22,25 @@ export async function GET(request: Request) {
             });
         }
 
+        const latParam = searchParams.get("lat");
+        const lonParam = searchParams.get("lon");
+        const lat = latParam ? parseFloat(latParam) : undefined;
+        const lon = lonParam ? parseFloat(lonParam) : undefined;
+
+        const dynamicKey = lat && lon ? `${CACHE_KEY}_${lat.toFixed(2)}_${lon.toFixed(2)}` : CACHE_KEY;
+
         let cachedFires = null;
         try {
-            cachedFires = await redis.get(CACHE_KEY);
+            cachedFires = await redis.get(dynamicKey);
             if (cachedFires) {
-                return NextResponse.json({ success: true, data: cachedFires });
+                return NextResponse.json({ success: true, data: typeof cachedFires === "string" ? JSON.parse(cachedFires) : cachedFires });
             }
         } catch (redisError) {
             console.warn("Redis is not available or failed:", redisError);
         }
 
         // Cache miss or Redis down: fetch fresh data
-        const rawFires = await fetchActiveFires();
+        const rawFires = await fetchActiveFires(lat, lon);
         const finalFires = [];
 
         // Store new ones in Turso

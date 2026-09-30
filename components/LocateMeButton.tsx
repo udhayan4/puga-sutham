@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Loader2 } from "lucide-react";
 
-export function LocateMeButton() {
+export function LocateMeButton({ onLocated }: { onLocated?: (lat: number, lon: number) => void }) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -14,15 +14,19 @@ export function LocateMeButton() {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
-                    // Push the new coordinates into the URL to trigger the dashboard shift!
-                    router.push(`/?lat=${latitude}&lon=${longitude}`);
+                    if (onLocated) {
+                        onLocated(latitude, longitude);
+                    }
+                    // Also push the new coordinates into the URL to trigger the dashboard shift!
+                    router.push(`/?lat=${latitude.toFixed(4)}&lon=${longitude.toFixed(4)}`);
                     setLoading(false);
                 },
                 (error) => {
                     console.error("Geolocation failed:", error);
-                    alert("Please allow location access in your browser to use this feature.");
+                    alert("Location permission was denied or unavailable. Please enable location permissions in your browser.");
                     setLoading(false);
-                }
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
             );
         } else {
             alert("Geolocation is not supported by your browser.");

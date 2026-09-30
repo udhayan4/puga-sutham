@@ -21,22 +21,28 @@ export async function GET(request: Request) {
             });
         }
 
+        const latParam = searchParams.get("lat");
+        const lonParam = searchParams.get("lon");
+        const lat = latParam ? parseFloat(latParam) : undefined;
+        const lon = lonParam ? parseFloat(lonParam) : undefined;
+
+        const dynamicKey = lat && lon ? `${CACHE_KEY}_${lat.toFixed(2)}_${lon.toFixed(2)}` : CACHE_KEY;
+
         // Attempt to get from cache first
         try {
-            const cached = await redis.get(CACHE_KEY);
+            const cached = await redis.get(dynamicKey);
             if (cached) {
-                return NextResponse.json({ success: true, data: cached });
+                return NextResponse.json({ success: true, data: typeof cached === "string" ? JSON.parse(cached) : cached });
             }
         } catch (redisError) {
             console.warn("Redis is not available or failed:", redisError);
-            // Fallback to direct fetch if redis is not configured
         }
 
-        // Fetch fresh data
-        const rawData = await fetchCurrentWind();
+        // Fetch fresh data for given coordinates
+        const rawData = await fetchCurrentWind(lat, lon);
 
         try {
-            await redis.setex(CACHE_KEY, CACHE_TTL_SECONDS, JSON.stringify(rawData));
+            await redis.setex(dynamicKey, CACHE_TTL_SECONDS, JSON.stringify(rawData));
         } catch (redisError) {
             console.warn("Redis set failed:", redisError);
         }

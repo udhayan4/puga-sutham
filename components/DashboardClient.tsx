@@ -54,6 +54,10 @@ interface DashboardClientProps {
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<NavTab>("overview");
+  const [activeLat, setActiveLat] = useState<number>(initialData.siteLat);
+  const [activeLon, setActiveLon] = useState<number>(initialData.siteLon);
+  const [activeRegionId, setActiveRegionId] = useState<string>("madurai-keeladi");
+  const [activeRegionName, setActiveRegionName] = useState<string>("Tamil Nadu / Madurai-Keeladi");
   const [predictionWindow, setPredictionWindow] = useState<number>(60);
   const [simResult, setSimResult] = useState<any>(null);
   const [selectedFire, setSelectedFire] = useState<any>(null);
@@ -63,6 +67,80 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
   // Single Centralized Source of Truth for Incident & Threat Status
   const [incident, setIncident] = useState<IncidentState>(ACTIVE_DEMO_INCIDENT_STATE);
+
+  // Handler for region changes (India, World, Regional, etc.)
+  const handleSelectRegion = (region: any) => {
+    setActiveRegionId(region.id);
+    setActiveRegionName(region.name);
+    setActiveLat(region.lat);
+    setActiveLon(region.lon);
+
+    // Update incident target zone
+    setIncident((prev) => ({
+      ...prev,
+      targetZone: {
+        name: region.name,
+        latitude: region.lat,
+        longitude: region.lon,
+      },
+      summary: `Active monitoring sector switched to ${region.name}. Scanning satellite thermal passes and Open-Meteo wind patterns for this zone.`,
+    }));
+
+    // Trigger background weather fetch for the new coordinates
+    fetch(`/api/wind?lat=${region.lat}&lon=${region.lon}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.data?.windSpeedKmh) {
+          setIncident((prev) => ({
+            ...prev,
+            wind: {
+              ...prev.wind,
+              speedKmh: Math.round(json.data.windSpeedKmh),
+              directionDeg: Math.round(json.data.windDirectionDeg),
+              compassHeading: `${Math.round(json.data.windDirectionDeg)}°`,
+              recordedAt: "Live Telemetry",
+            },
+          }));
+        }
+      })
+      .catch((e) => console.warn("Failed fetching wind for new region", e));
+  };
+
+  const handleCustomGps = (lat: number, lon: number, name?: string) => {
+    const label = name || `User GPS (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
+    setActiveRegionId("custom-gps");
+    setActiveRegionName(label);
+    setActiveLat(lat);
+    setActiveLon(lon);
+
+    setIncident((prev) => ({
+      ...prev,
+      targetZone: {
+        name: label,
+        latitude: lat,
+        longitude: lon,
+      },
+      summary: `Target site shifted to your real-time coordinates (${lat.toFixed(4)}, ${lon.toFixed(4)}). Calculating atmospheric smoke vectors.`,
+    }));
+
+    fetch(`/api/wind?lat=${lat}&lon=${lon}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.data?.windSpeedKmh) {
+          setIncident((prev) => ({
+            ...prev,
+            wind: {
+              ...prev.wind,
+              speedKmh: Math.round(json.data.windSpeedKmh),
+              directionDeg: Math.round(json.data.windDirectionDeg),
+              compassHeading: `${Math.round(json.data.windDirectionDeg)}°`,
+              recordedAt: "Live Telemetry",
+            },
+          }));
+        }
+      })
+      .catch((e) => console.warn("Failed fetching wind for custom GPS", e));
+  };
 
   // 10-Step Automated Demo Scenario Sequence
   const runDemoScenario = () => {
@@ -233,6 +311,11 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         onRunDemoScenario={runDemoScenario}
         onResetIncident={resetToNominal}
         isScenarioRunning={isScenarioRunning}
+        currentRegionId={activeRegionId}
+        currentLat={activeLat}
+        currentLon={activeLon}
+        onSelectRegion={handleSelectRegion}
+        onCustomGps={handleCustomGps}
       />
 
       {/* Main Content Area */}
@@ -422,8 +505,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                   </div>
 
                   <MapWrapper
-                    siteLat={initialData.siteLat}
-                    siteLon={initialData.siteLon}
+                    siteLat={activeLat}
+                    siteLon={activeLon}
                     fires={fires}
                     smokeReports={smokeReports}
                     clearReports={clearReports}
@@ -464,9 +547,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
             {/* Receptor Proximity & Guidance */}
             <PersonalRisk
-              currentLat={initialData.siteLat}
-              currentLon={initialData.siteLon}
-              isCustomLocation={initialData.isCustomLocation}
+              currentLat={activeLat}
+              currentLon={activeLon}
+              isCustomLocation={activeRegionId !== "madurai-keeladi"}
               riskScore={isThreatActive ? 85 : 15}
               riskState={incident.riskLevel}
               nearestFireDist={incident.distanceKm}
@@ -490,8 +573,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             </div>
 
             <MapWrapper
-              siteLat={initialData.siteLat}
-              siteLon={initialData.siteLon}
+              siteLat={activeLat}
+              siteLon={activeLon}
               fires={fires}
               smokeReports={smokeReports}
               clearReports={clearReports}
@@ -536,8 +619,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               />
 
               <MapWrapper
-                siteLat={initialData.siteLat}
-                siteLon={initialData.siteLon}
+                siteLat={activeLat}
+                siteLon={activeLon}
                 fires={fires}
                 smokeReports={smokeReports}
                 clearReports={clearReports}
@@ -564,8 +647,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                   Photographic sightings submitted by rangers & villagers, classified via on-device MobileNet.
                 </p>
                 <MapWrapper
-                  siteLat={initialData.siteLat}
-                  siteLon={initialData.siteLon}
+                  siteLat={activeLat}
+                  siteLon={activeLon}
                   fires={fires}
                   smokeReports={smokeReports}
                   clearReports={clearReports}

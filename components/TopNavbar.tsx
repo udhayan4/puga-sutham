@@ -7,6 +7,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { IncidentState } from "../lib/incident-engine";
+import { RegionSelector, GeoRegion } from "./RegionSelector";
 
 export type NavTab =
   | "overview"
@@ -25,6 +26,11 @@ interface TopNavbarProps {
   onRunDemoScenario: () => void;
   onResetIncident: () => void;
   isScenarioRunning: boolean;
+  currentRegionId?: string;
+  currentLat?: number;
+  currentLon?: number;
+  onSelectRegion?: (region: GeoRegion) => void;
+  onCustomGps?: (lat: number, lon: number, name?: string) => void;
 }
 
 export function TopNavbar({
@@ -32,6 +38,11 @@ export function TopNavbar({
   onTabChange,
   incident,
   onResetIncident,
+  currentRegionId,
+  currentLat,
+  currentLon,
+  onSelectRegion,
+  onCustomGps,
 }: TopNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -97,12 +108,23 @@ export function TopNavbar({
           </nav>
         </div>
 
-        {/* Right Status Indicator & Actions */}
-        <div className="flex items-center gap-3">
+        {/* Right Status Indicator, Region Selector & Actions */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Global / India Region Selector */}
+          {onSelectRegion && onCustomGps && (
+            <RegionSelector
+              currentRegionId={currentRegionId}
+              currentLat={currentLat || 9.8559}
+              currentLon={currentLon || 78.1932}
+              onSelectRegion={onSelectRegion}
+              onCustomGps={onCustomGps}
+            />
+          )}
+
           {/* Live Pulse Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#475569]">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#475569]">
             <span className="w-2 h-2 rounded-full bg-[#16A34A] status-pulse"></span>
-            <span className="text-[11px] font-semibold">System Online</span>
+            <span className="text-[11px] font-semibold">Live Telemetry</span>
           </div>
 
           {/* Reset button */}

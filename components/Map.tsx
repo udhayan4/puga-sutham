@@ -67,11 +67,14 @@ interface MapProps {
 }
 
 // Controller component to zoom/pan to newly selected locations
-function MapRecenter({ lat, lon }: { lat: number; lon: number }) {
+function MapRecenter({ lat, lon, zoom }: { lat: number; lon: number; zoom?: number }) {
   const map = useMap();
   useEffect(() => {
-    map.panTo([lat, lon]);
-  }, [lat, lon, map]);
+    map.flyTo([lat, lon], zoom || 11, {
+      duration: 1.2,
+      easeLinearity: 0.25,
+    });
+  }, [lat, lon, zoom, map]);
   return null;
 }
 
